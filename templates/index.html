@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Завантаження відео, аудіо та зображень</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: rgb(6,2,13);
+        }
+        .video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            z-index: -1;
+        }
+        header video {
+            top: 10px;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+        header {
+            top: 15px;
+            position: relative;
+            border-radius: 10px;
+            background: rgb(2,3,33);
+            background: radial-gradient(circle, rgba(2,3,33,1) 0%, rgba(0,0,0,1) 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            z-index: 1;
+        }
+        header h1 {
+            background: white text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
+            font-family: 'COMIC SANS MS', cursive;
+            font-size: 2.2rem;
+        }
+        .sidebar {
+            background: rgb(6,0,10);
+            background: linear-gradient(90deg, rgba(6,0,10,1) 0%, rgba(3,1,30,1) 100%);
+            height: 100%;
+            position: absolute;
+            left: 0;
+            width: 15%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            top: 105px;
+            padding-top: 25px;
+        }
+        .main-content {
+            margin-left: 15%;
+            width: 85%;
+            padding: 20px;
+        }
+        .icon-button {
+            background: rgb(24,1,39);
+            background: linear-gradient(90deg, rgba(24,1,39,1) 0%, rgba(20,2,68,1) 50%, rgba(7,2,49,1) 100%);
+            width: 100%;
+            max-width: 400px;
+            height: 50px;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: none;
+        }
+        .icon-button:hover {
+            background: rgb(63,3,103);
+            background: linear-gradient(90deg, rgba(63,3,103,1) 0%, rgba(61,10,202,1) 50%, rgba(13,4,95,1) 100%);
+        }
+        .hidden {
+            display: none;
+        }
+        .media-container {
+            margin-top: 20px;
+            width: 600px;
+            height: 300px;
+            background-color: #333;
+            border-radius: 10px;
+            display: none;
+            text-align: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+        .media-container video,
+        .media-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #myVideo {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+        }
+        .icon-button i {
+            margin-right: 10px;
+        }
+        .audio-controls {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .audio-controls button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .audio-controls button:hover {
+            background: #45a049;
+        }
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .volume-control input[type="range"] {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="video-container">
+<video autoplay muted loop>
+    <source src="{{ url_for('static', filename='why.mp4') }}" type="video/mp4">
+    Ваш браузер не підтримує відео.
+</video>
+        </div>
+        <h1>Football Analysis</h1>
+    </header>
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 sidebar">
+                <button class="icon-button" id="dropButton">
+                    <i class="fa fa-upload"></i>
+                    <span class="text-nowrap text-2xs">  Завантажити відео</span>
+                </button>
+                <button class="icon-button" id="imageButton">
+                    <i class="fa fa-image"></i>
+                    <span class="text-nowrap text-2xs">  Завантажити зображення</span>
+                </button>
+                <button class="icon-button" id="audioButton">
+                    <i class="fa fa-music"></i>
+                    <span class="text-nowrap text-2xs">  Завантажити аудіо</span>
+                </button>
+            </nav>
+            <main class="main-content d-flex flex-column align-items-center py-5">
+                <form action="/upload" method="POST" enctype="multipart/form-data" class="text-center w-50">
+                    <input type="file" class="form-control hidden" id="fileInput" name="video" accept="video/mp4">
+                    <input type="file" class="form-control hidden" id="imageInput" name="image" accept="image/*">
+                    <input type="file" class="form-control hidden" id="audioInput" name="audio" accept="audio/*">
+                </form>
+
+                <div id="videoContainer" class="media-container">
+                    <video id="videoPlayer" controls>
+                        <source id="videoSource" src="" type="video/mp4">
+                        Ваш браузер не підтримує відео.
+                    </video>
+                </div>
+
+                <div id="imageContainer" class="media-container">
+                    <img id="imagePreview" src="" alt="Зображення">
+                </div>
+
+                <div id="audioContainer" class="media-container">
+                    <div id="waveform"></div>
+                    <div class="audio-controls">
+                        <button id="playPauseButton">
+                            <i class="fa fa-play"></i>
+                        </button>
+                        <div class="volume-control">
+                            <i class="fa fa-volume-up"></i>
+                            <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1">
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/wavesurfer.js"></script>
+    <script>
+let wavesurfer;
+
+document.getElementById("dropButton").addEventListener("click", function () {
+    document.getElementById("fileInput").click();
+});
+
+document.getElementById("fileInput").addEventListener("change", function (event) {
+    document.getElementById("videoContainer").style.display = "none";
+
+    setTimeout(function() {
+        // Показуємо відео після 30 секунд
+        document.getElementById("videoContainer").style.display = "block";
+
+        const videoURL = '55.mp4';
+        document.getElementById("videoSource").src = videoURL;
+        document.getElementById("videoPlayer").load();
+    }, 40000); // 30000 мілісекунд = 30 секунд
+});
+
+
+
+document.getElementById("imageButton").addEventListener("click", function () {
+    document.getElementById("imageInput").click();
+});
+
+document.getElementById("imageInput").addEventListener("change", function (event) {
+    document.getElementById("imageContainer").style.display = "block";
+    const imageFile = event.target.files[0];
+    const imageURL = URL.createObjectURL(imageFile);
+    document.getElementById("imagePreview").src = imageURL;
+});
+
+document.getElementById("audioButton").addEventListener("click", function () {
+    document.getElementById("audioInput").click();
+});
+
+document.getElementById("audioInput").addEventListener("change", function (event) {
+    document.getElementById("audioContainer").style.display = "block";
+    const audioFile = event.target.files[0];
+    const audioURL = URL.createObjectURL(audioFile);
+
+    wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: 'violet',
+        progressColor: 'purple',
+        backend: 'MediaElement',
+        height: 100,
+    });
+
+    wavesurfer.load(audioURL);
+
+    const playPauseButton = document.getElementById('playPauseButton');
+    playPauseButton.addEventListener('click', () => {
+        wavesurfer.playPause();
+        if (wavesurfer.isPlaying()) {
+            playPauseButton.innerHTML = '<i class="fa fa-pause"></i>';
+        } else {
+            playPauseButton.innerHTML = '<i class="fa fa-play"></i>';
+        }
+    });
+
+    const volumeControl = document.getElementById('volumeControl');
+    volumeControl.addEventListener('input', (event) => {
+        wavesurfer.setVolume(event.target.value);
+    });
+    </script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const videoSrc = "{{ video_url }}";
+        const videoPlayer = document.getElementById("videoPlayer");
+        const videoSource = document.getElementById("videoSource");
+
+        document.getElementById("videoContainer").style.display = "block";
+        videoSource.src = videoSrc;
+        videoPlayer.load();
+    });
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
